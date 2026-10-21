@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Бронювання{% endblock %}
+{% block content %}
+<div class="form-container">
+    <h1>{{ 'Редагування бронювання №' ~ booking.booking_id if booking else 'Нове бронювання' }}</h1>
+    <form method="post" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        {% if not booking %}
+        <div class="form-group {{ 'has-error' if errors.guest_id }}">
+            <label>Гість *</label>
+            <select name="guest_id">
+                <option value="">— оберіть —</option>
+                {% for g in guests_list %}
+                    <option value="{{ g.guest_id }}" {{ 'selected' if form.guest_id|string == g.guest_id|string }}>{{ g.name }}</option>
+                {% endfor %}
+            </select>
+            {% if errors.guest_id %}<small class="error">{{ errors.guest_id }}</small>{% endif %}
+        </div>
+        {% endif %}
+
+        <div class="form-group {{ 'has-error' if errors.room_id }}">
+            <label>Номер *</label>
+            <select name="room_id">
+                <option value="">— оберіть —</option>
+                {% for r in rooms_list %}
+                    <option value="{{ r.room_id }}" {{ 'selected' if form.room_id|string == r.room_id|string }}>
+                        {{ r.room_number }} · {{ r.name }} · до {{ r.capacity }} гост. · {{ r.base_price }} грн/ніч</option>
+                {% endfor %}
+            </select>
+            {% if errors.room_id %}<small class="error">{{ errors.room_id }}</small>{% endif %}
+        </div>
+
+        <div class="form-group {{ 'has-error' if errors.check_in }}">
+            <label>Дата заїзду *</label>
+            <input type="date" name="check_in" value="{{ form.check_in }}">
+            {% if errors.check_in %}<small class="error">{{ errors.check_in }}</small>{% endif %}
+        </div>
+        <div class="form-group {{ 'has-error' if errors.check_out }}">
+            <label>Дата виїзду *</label>
+            <input type="date" name="check_out" value="{{ form.check_out }}">
+            {% if errors.check_out %}<small class="error">{{ errors.check_out }}</small>{% endif %}
+        </div>
+        <div class="form-group {{ 'has-error' if errors.guests_count }}">
+            <label>Кількість гостей *</label>
+            <input type="number" name="guests_count" value="{{ form.guests_count }}">
+            {% if errors.guests_count %}<small class="error">{{ errors.guests_count }}</small>{% endif %}
+        </div>
+
+        <p class="hint">Вартість проживання розраховується автоматично (тригер у БД).</p>
+        <div class="form-actions">
+            <a class="btn" href="{{ url_for('bookings') }}">Скасувати</a>
+            <button class="btn btn-primary">Зберегти</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

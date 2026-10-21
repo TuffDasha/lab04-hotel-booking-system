@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="form-container">
+    <h1>Помилка</h1>
+    <p>{{ message }}</p>
+    <p><a class="btn btn-primary" href="{{ url_for('index') }}">На головну</a></p>
+</div>
+{% endblock %}

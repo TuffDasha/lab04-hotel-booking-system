@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="form-container">
+    <h1>{{ title }}</h1>
+    <form method="post" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        {% set fields = [('first_name', 'Ім’я', 'text', true),
+                         ('last_name', 'Прізвище', 'text', true),
+                         ('email', 'Email', 'email', true),
+                         ('phone', 'Телефон', 'tel', false),
+                         ('birth_date', 'Дата народження', 'date', false)] %}
+        {% for name, label, type, req in fields %}
+        <div class="form-group {{ 'has-error' if errors[name] }}">
+            <label for="{{ name }}">{{ label }}{{ ' *' if req }}</label>
+            <input id="{{ name }}" name="{{ name }}" type="{{ type }}" value="{{ form.get(name, '') }}">
+            {% if errors[name] %}<small class="error">{{ errors[name] }}</small>{% endif %}
+        </div>
+        {% endfor %}
+        <div class="form-actions">
+            <a class="btn" href="{{ url_for('guests') }}">Скасувати</a>
+            <button class="btn btn-primary">Зберегти</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

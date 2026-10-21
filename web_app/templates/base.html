@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Панель{% endblock %} · Roomly hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=4) }}">
+</head>
+<body>
+{% set ep = request.endpoint or '' %}
+<aside class="sidebar">
+    <a class="brand" href="{{ url_for('index') }}">
+        <span class="brand-logo">🏨</span>
+        <span class="brand-name">Roomly hub<small>Hotel booking</small></span>
+    </a>
+    <ul class="menu">
+        <li><a href="{{ url_for('index') }}" class="{{ 'active' if ep == 'index' }}"><span class="ico">📊</span>Головна</a></li>
+        <li><a href="{{ url_for('bookings') }}" class="{{ 'active' if ep.startswith('booking') }}"><span class="ico">📋</span>Бронювання</a></li>
+        <li><a href="{{ url_for('rooms') }}" class="{{ 'active' if ep.startswith('room') }}"><span class="ico">🛏️</span>Номери</a></li>
+        <li><a href="{{ url_for('guests') }}" class="{{ 'active' if ep.startswith('guest') }}"><span class="ico">👤</span>Гості</a></li>
+    </ul>
+    <div class="sidebar-foot">Почувайтеся як удома,<br>де б ви не були</div>
+</aside>
+
+<main class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+</main>
+
+<footer>© 2026 Roomly hub. Усі права захищено.</footer>
+</body>
+</html>

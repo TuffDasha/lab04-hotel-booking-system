@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Головна{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Ласкаво просимо до Roomly hub</h1>
+        <p class="sub">Огляд готелю на сьогодні</p>
+    </div>
+    <div class="actions">
+        <a class="btn btn-primary" href="{{ url_for('booking_form') }}">+ Нове бронювання</a>
+        <a class="btn" href="{{ url_for('rooms') }}">🔎 Знайти вільний номер</a>
+    </div>
+</div>
+
+<div class="cards">
+    <div class="card stat stat-blue"><span class="stat-ico">👥</span><h3>Гостей у базі</h3><p class="big">{{ s.guests }}</p></div>
+    <div class="card stat stat-teal"><span class="stat-ico">📅</span><h3>Активних бронювань</h3><p class="big">{{ s.active_bookings }}</p></div>
+    <div class="card stat stat-lilac"><span class="stat-ico">🛌</span><h3>Номерів зайнято</h3><p class="big">{{ s.occupied }}</p></div>
+    <div class="card stat stat-green"><span class="stat-ico">✅</span><h3>Номерів вільно</h3><p class="big">{{ s.free_rooms }}</p></div>
+    <div class="card stat stat-peach"><span class="stat-ico">💳</span><h3>Заборгованість</h3><p class="big">{{ '%.0f'|format(s.debt) }} грн</p></div>
+</div>
+
+<section class="about" id="about">
+    <div>
+        <h2>Про нас</h2>
+        <p>Roomly hub: сервіс, що робить бронювання простим, а перебування приємним.
+           Ми дбаємо про кожного гостя, щоб кожна подорож залишала лише теплі спогади.</p>
+        <p class="quote">«Почувайтеся як удома, де б ви не були»</p>
+        <p><strong>Власниця:</strong> Матяш Дарія Сергіївна</p>
+    </div>
+    <div class="about-contacts">
+        <a class="contact" href="tel:+380961966032">
+            <span class="ico">📞</span>
+            <span><small>Телефон</small>096 196 60 32</span>
+        </a>
+        <a class="contact" href="mailto:DaBlue69@gmail.com">
+            <span class="ico">✉️</span>
+            <span><small>Пошта</small>DaBlue69@gmail.com</span>
+        </a>
+        <div class="contact">
+            <span class="ico">👩‍💼</span>
+            <span><small>Власниця</small>Матяш Дарія Сергіївна</span>
+        </div>
+    </div>
+</section>
+{% endblock %}

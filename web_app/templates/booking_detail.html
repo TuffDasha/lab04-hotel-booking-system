@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Бронювання №{{ b.booking_id }}{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>Бронювання №{{ b.booking_id }}
+        <span class="badge badge-{{ b.status }}">{{ b.status|ua }}</span></h1>
+    <div class="actions">
+        {% if next_status %}
+        <form method="post" action="{{ url_for('booking_status', booking_id=b.booking_id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-primary">{{ 'Заселити' if next_status == 'checked_in' else 'Виселити' }}</button>
+        </form>
+        {% endif %}
+        {% if b.status in ('confirmed', 'checked_in') %}
+            <a class="btn btn-edit" href="{{ url_for('booking_form', booking_id=b.booking_id) }}">✏️ Редагувати</a>
+        {% endif %}
+        {% if b.status == 'confirmed' %}
+        <form method="post" action="{{ url_for('booking_cancel', booking_id=b.booking_id) }}"
+              onsubmit="return confirm('Скасувати бронювання?')">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-delete">Скасувати</button>
+        </form>
+        {% endif %}
+        <form method="post" action="{{ url_for('booking_delete', booking_id=b.booking_id) }}"
+              onsubmit="return confirm('Видалити разом з оплатами та послугами?')">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-delete">🗑️ Видалити</button>
+        </form>
+    </div>
+</div>
+
+<div class="cards">
+    <div class="card"><h3>Гість</h3><p>{{ b.guest_name }}<br>{{ b.email }}</p></div>
+    <div class="card"><h3>Проживання</h3>
+        <p>Номер {{ b.room_number }} ({{ b.room_type }})<br>
+           {{ b.check_in }} → {{ b.check_out }} · {{ b.nights }} ноч. · {{ b.guests_count }} гост.</p></div>
+    <div class="card"><h3>Фінанси</h3>
+        <p>Сплачено: {{ b.paid_total }} грн<br>
+           До сплати: <strong class="{{ 'debt' if b.balance_due > 0 }}">{{ b.balance_due }} грн</strong></p></div>
+</div>
+
+<h2>Рахунок</h2>
+<div class="table-container">
+<table class="data-table">
+    <thead><tr><th>Позиція</th><th>К-сть</th><th>Ціна</th><th>Сума</th></tr></thead>
+    <tbody>
+    {% for row in invoice %}
+        <tr class="{{ 'total-row' if row.line_no >= 3 }}">
+            <td>{{ row.item }}</td>
+            <td>{{ row.qty if row.qty is not none else '' }}</td>
+            <td>{{ row.unit_price if row.unit_price is not none else '' }}</td>
+            <td>{{ row.line_total }} грн</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+
+<div class="two-col">
+    <div>
+        <h2>Оплати</h2>
+        <table class="data-table">
+            <thead><tr><th>Дата</th><th>Сума</th><th>Спосіб</th></tr></thead>
+            <tbody>
+            {% for p in payments %}
+                <tr><td>{{ p.paid_at.strftime('%d.%m.%Y %H:%M') }}</td><td>{{ p.amount }} грн</td>
+                    <td>{{ {'card': 'Картка', 'cash': 'Готівка', 'transfer': 'Переказ'}[p.method] }}</td></tr>
+            {% else %}
+                <tr><td colspan="3">Оплат ще немає</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% if b.status != 'cancelled' %}
+        <form method="post" action="{{ url_for('booking_add_payment', booking_id=b.booking_id) }}" class="inline-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input name="amount" placeholder="Сума, грн">
+            <select name="method">
+                <option value="card">Картка</option>
+                <option value="cash">Готівка</option>
+                <option value="transfer">Переказ</option>
+            </select>
+            <button class="btn btn-primary">Прийняти оплату</button>
+        </form>
+        {% endif %}
+    </div>
+
+    <div>
+        <h2>Додати послугу</h2>
+        {% if b.status in ('confirmed', 'checked_in') %}
+        <form method="post" action="{{ url_for('booking_add_service', booking_id=b.booking_id) }}" class="inline-form">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <select name="service_id">
+                {% for s in services %}<option value="{{ s.service_id }}">{{ s.name }} ({{ s.price }} грн)</option>{% endfor %}
+            </select>
+            <input name="quantity" type="number" value="1" style="width:5rem">
+            <button class="btn btn-primary">Додати</button>
+        </form>
+        {% else %}
+            <p class="hint">Послуги можна додавати лише до активних бронювань.</p>
+        {% endif %}
+
+        <h2>Історія статусів</h2>
+        <table class="data-table">
+            <thead><tr><th>Коли</th><th>Було</th><th>Стало</th></tr></thead>
+            <tbody>
+            {% for h in history %}
+                <tr><td>{{ h.changed_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                    <td>{{ h.old_status|ua }}</td><td>{{ h.new_status|ua }}</td></tr>
+            {% else %}
+                <tr><td colspan="3">Змін статусу не було</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

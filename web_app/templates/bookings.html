@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Бронювання{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h1>📋 Бронювання</h1>
+    <a class="btn btn-primary" href="{{ url_for('booking_form') }}">+ Нове бронювання</a>
+</div>
+<div class="filters">
+    <a class="btn btn-small {{ 'btn-primary' if not status }}" href="{{ url_for('bookings') }}">Усі</a>
+    {% for s in statuses %}
+        <a class="btn btn-small {{ 'btn-primary' if status == s }}"
+           href="{{ url_for('bookings', status=s) }}">{{ s|ua }}</a>
+    {% endfor %}
+</div>
+<div class="table-container">
+<table class="data-table">
+    <thead><tr><th>№</th><th>Гість</th><th>Номер</th><th>Заїзд</th><th>Виїзд</th>
+        <th>Статус</th><th>Разом</th><th>Борг</th><th></th></tr></thead>
+    <tbody>
+    {% for b in bookings %}
+        <tr>
+            <td>{{ b.booking_id }}</td><td>{{ b.guest_name }}</td>
+            <td>{{ b.room_number }} ({{ b.room_type }})</td>
+            <td>{{ b.check_in }}</td><td>{{ b.check_out }}</td>
+            <td><span class="badge badge-{{ b.status }}">{{ b.status|ua }}</span></td>
+            <td>{{ b.grand_total }} грн</td>
+            <td class="{{ 'debt' if b.balance_due > 0 }}">{{ b.balance_due }} грн</td>
+            <td><a class="btn btn-small" href="{{ url_for('booking_detail', booking_id=b.booking_id) }}">Відкрити</a></td>
+        </tr>
+    {% else %}
+        <tr><td colspan="9">Бронювань немає</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% endblock %}

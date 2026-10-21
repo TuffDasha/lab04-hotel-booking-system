@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Номери{% endblock %}
+{% block content %}
+<div class="page-header"><h1>🛏️ Номери</h1></div>
+
+<h2>Пошук вільних номерів</h2>
+<form method="get" class="search-grid">
+    <label>Заїзд <input type="date" name="check_in" value="{{ search.get('check_in', '') }}"></label>
+    <label>Виїзд <input type="date" name="check_out" value="{{ search.get('check_out', '') }}"></label>
+    <label>Гостей <input type="number" name="guests_count" min="1" max="10"
+                         value="{{ search.get('guests_count', 1) }}"></label>
+    <button class="btn btn-primary">Знайти</button>
+</form>
+{% for msg in search_errors.values() %}<div class="alert alert-error">{{ msg }}</div>{% endfor %}
+
+{% if found is not none %}
+<div class="table-container">
+<table class="data-table">
+    <thead><tr><th>Номер</th><th>Тип</th><th>Місць</th><th>Ціна/ніч</th><th>За весь період</th><th></th></tr></thead>
+    <tbody>
+    {% for r in found %}
+        <tr>
+            <td>{{ r.room_number }}</td><td>{{ r.room_type }}</td><td>{{ r.capacity }}</td>
+            <td>{{ r.base_price }} грн</td><td>{{ r.total }} грн</td>
+            <td><a class="btn btn-small btn-primary"
+                   href="{{ url_for('booking_form', room_id=r.room_id, check_in=search.check_in,
+                                    check_out=search.check_out, guests_count=search.get('guests_count', 1)) }}">Забронювати</a></td>
+        </tr>
+    {% else %}
+        <tr><td colspan="6">На ці дати вільних номерів немає</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% endif %}
+
+<h2>Стан номерів сьогодні</h2>
+<div class="table-container">
+<table class="data-table">
+    <thead><tr><th>Номер</th><th>Поверх</th><th>Тип</th><th>Місць</th><th>Ціна/ніч</th>
+        <th>Стан</th><th>Гість / до</th><th></th></tr></thead>
+    <tbody>
+    {% for r in rooms %}
+        <tr>
+            <td>{{ r.room_number }}</td><td>{{ r.floor }}</td><td>{{ r.room_type }}</td>
+            <td>{{ r.capacity }}</td><td>{{ r.base_price }} грн</td>
+            <td><span class="badge badge-{{ r.current_state }}">{{ r.current_state|ua }}</span></td>
+            <td>{% if r.guest_name %}{{ r.guest_name }} (до {{ r.busy_until }}){% else %}—{% endif %}</td>
+            <td>
+                <form method="post" action="{{ url_for('room_status', room_id=r.room_id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    {% if r.current_state == 'maintenance' %}
+                        <input type="hidden" name="status" value="available">
+                        <button class="btn btn-small">Повернути в роботу</button>
+                    {% else %}
+                        <input type="hidden" name="status" value="maintenance">
+                        <button class="btn btn-small btn-edit">На ремонт</button>
+                    {% endif %}
+                </form>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% endblock %}
